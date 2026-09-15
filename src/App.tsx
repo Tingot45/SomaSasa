@@ -113,6 +113,7 @@ export default function App() {
 
   // Authenticate monitor
   useEffect(() => {
+    if (DEV_MODE && firebaseUser?.uid === "dev-user") return;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setFirebaseUser(user);
@@ -300,12 +301,28 @@ export default function App() {
     }
   };
 
+  const DEV_MODE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
   const handleLogin = async () => {
     try {
       await signInWithPopup(auth, googleAuthProvider);
     } catch (err) {
       console.error("Login popup failed:", err);
     }
+  };
+
+  const handleDevLogin = async (role: "student" | "teacher") => {
+    setFirebaseUser({ uid: "dev-user", displayName: "Dev User", email: "dev@somasasa.local" } as any);
+    setToken("dev-token");
+    setDbUser({
+      id: 1,
+      uid: "dev-user",
+      email: "dev@somasasa.local",
+      role,
+      isSubscribed: true,
+      points: 120,
+    } as any);
+    setAuthLoading(false);
   };
 
   const handleLogout = async () => {
@@ -635,6 +652,26 @@ export default function App() {
               <Smartphone className="h-5 w-5" />
               Sign in with Google
             </button>
+
+            {DEV_MODE && (
+              <div className="border-t border-slate-200 pt-4 mt-2 space-y-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Dev Mode - Skip Auth</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleDevLogin("student")}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition"
+                  >
+                    Enter as Student
+                  </button>
+                  <button
+                    onClick={() => handleDevLogin("teacher")}
+                    className="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-sm transition"
+                  >
+                    Enter as Teacher
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <p className="text-xs text-slate-400 font-medium">

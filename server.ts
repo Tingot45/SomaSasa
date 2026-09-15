@@ -36,6 +36,32 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // DEV BYPASS: Skip Firebase auth for local development
+  if (process.env.NODE_ENV !== "production") {
+    app.post("/api/dev/login", async (req, res) => {
+      const { email, role } = req.body;
+      const devEmail = email || "dev@somasasa.local";
+      const devUid = "dev-user-" + Date.now();
+
+      // Upsert dev user in DB
+      const result = await db
+        .insert(users)
+        .values({
+          uid: devUid,
+          email: devEmail,
+          role: role || "student",
+          isSubscribed: true,
+        })
+        .onConflictDoUpdate({
+          target: users.uid,
+          set: { email: devEmail },
+        })
+        .returning();
+
+      res.json({ user: result[0], uid: devUid, token: "dev-token-" + devUid });
+    });
+  }
+
   // 1. User Sync: Register or fetch user
   app.post("/api/users/sync", requireAuth, async (req: AuthRequest, res) => {
     try {
