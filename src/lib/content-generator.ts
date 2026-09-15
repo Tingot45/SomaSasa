@@ -31,6 +31,26 @@ interface GeneratedLessonData {
   quizQuestions: GeneratedQuizQuestion[];
 }
 
+async function generateWithRetry<T>(fn: () => Promise<T>, maxRetries = 4): Promise<T> {
+  let lastError: any;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      lastError = err;
+      // Retry on transient 503 (high demand) or 429 (rate limit) errors
+      const isRetryable = err?.status === 503 || err?.status === 429;
+      if (!isRetryable || attempt === maxRetries) {
+        throw err;
+      }
+      const delay = 2000 * Math.pow(2, attempt); // 2s, 4s, 8s, 16s backoff
+      console.log(`AI generation attempt ${attempt + 1} failed (${err.status}). Retrying in ${delay / 1000}s...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+  throw lastError;
+}
+
 export async function generateLessonAndResources(
   materialContent: string,
   grade: number,
@@ -74,28 +94,40 @@ export async function generateLessonAndResources(
 
     CRITICAL REQUIREMENTS:
     1. The "content" field MUST be a detailed, comprehensive lesson of 600 to 1,200 words. Do not make it brief or summarize. Write paragraphs explaining concepts, defining terms, and providing step-by-step reasoning.
-    2. Adapt explanations to the Kenyan school context, using familiar examples (e.g., M-Pesa, matatus, maize farming, tea plantations, local wildlife, Nairobi, Mombasa, Kenyan athletes, market days).
-    3. Include a relatable real-world "analogy" (focused on the Kenyan context) that makes abstract concepts clear.
-    4. "diagramCode" MUST be a complete, valid, self-contained, and beautiful SVG XML string representing a helpful educational diagram, chart, or infographic.
+    2. Format the "content" field using clean Markdown:
+       - Use "## " for main section headings, "### " for sub-headings, and "#### " for sub-sub-headings.
+       - Use *single asterisks* for italics and **double asterisks** for bold emphasis.
+       - Use "- " for bullet lists and "1. " for numbered lists when listing steps or examples.
+       - Use blockquotes ("> ") for important notes or key takeaways.
+    3. For ALL mathematical expressions, formulas, equations, fractions, and symbols, use LaTeX:
+       - Use $...$ for inline math (e.g., the fraction $\frac{3}{4}$ has numerator 3).
+       - Use $$...$$ for display/block equations on their own line (e.g., $$\frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}$$).
+       - Use proper LaTeX commands for fractions (\frac{}{}), square roots (\sqrt{}), powers (x^{2}), subscripts (x_{1}), Greek letters (\pi, \theta, \alpha), multiplication (\times), division (\div), and comparison symbols (\leq, \geq, \neq).
+       - Never write math as plain text or ASCII (do NOT use "3/4", "x^2", or "sqrt"). Always use LaTeX.
+    4. Adapt explanations to the Kenyan school context, using familiar examples (e.g., M-Pesa, matatus, maize farming, tea plantations, local wildlife, Nairobi, Mombasa, Kenyan athletes, market days).
+    5. Include a relatable real-world "analogy" (focused on the Kenyan context) that makes abstract concepts clear.
+    6. "diagramCode" MUST be a complete, valid, self-contained, and beautiful SVG XML string representing a helpful educational diagram, chart, or infographic.
        - The SVG must be clean, responsive (use viewBox, width="100%", height="100%"), have nice rounded corners, modern color schemes (like slate, emerald, royal blue, amber), and readable text.
        - DO NOT use markdown or any text outside the SVG. Start directly with "<svg" and end with "</svg>".
-    5. Provide a clear "narrationScript" of 150-250 words that a teacher would read to explain this lesson to a class.
-    6. Generate 5 "flashcards" for key vocabulary/concepts.
-    7. Generate 5 "practiceQuestions" and 5 "quizQuestions" with varying difficulties: 'easy', 'medium', 'hard'.
+    7. Provide a clear "narrationScript" of 150-250 words that a teacher would read to explain this lesson to a class.
+    8. Generate 5 "flashcards" for key vocabulary/concepts.
+    9. Generate 5 "practiceQuestions" and 5 "quizQuestions" with varying difficulties: 'easy', 'medium', 'hard'.
        - Questions can be 'multiple-choice', 'short-answer', or 'true-false'.
        - For multiple-choice questions, "options" must be an array of exactly 4 strings. For others, "options" must be null.
        - Provide helpful "hint" and detailed "explanation" for each.
+       - In question prompts and explanations, use LaTeX ($...$) for any mathematical expressions.
     
     Format the entire output as a strict JSON object matching the provided schema.
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
+    const response = await generateWithRetry(() =>
+      ai.models.generateContent({
+        model: "gemini-3.6-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
           type: Type.OBJECT,
           properties: {
             title: { type: Type.STRING, description: "Title of the lesson" },
@@ -167,8 +199,9 @@ export async function generateLessonAndResources(
             "quizQuestions",
           ],
         },
-      },
-    });
+        },
+      })
+    );
 
     const text = response.text;
     if (!text) {

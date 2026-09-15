@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, X, AlertCircle, HelpCircle, Trophy, Lightbulb, RefreshCw } from "lucide-react";
 import { DbQuestion } from "../types.ts";
+import Markdown from "./Markdown.tsx";
 
 interface QuizRoomProps {
   questions: DbQuestion[];
@@ -144,7 +145,7 @@ export default function QuizRoom({ questions, isQuizMode, onComplete }: QuizRoom
           </div>
 
           <h3 className="text-lg font-bold text-slate-800 leading-snug mb-5">
-            {currentQuestion.prompt}
+            <Markdown>{currentQuestion.prompt}</Markdown>
           </h3>
 
           {/* Options Display (MCQ / TF) */}
@@ -174,7 +175,7 @@ export default function QuizRoom({ questions, isQuizMode, onComplete }: QuizRoom
                     className={`w-full p-4 border-2 rounded-xl text-left transition flex items-center justify-between text-sm ${optionStyle}`}
                     disabled={(!isQuizMode && isChecked) || quizFinished}
                   >
-                    <span>{opt}</span>
+                    <span><Markdown>{opt}</Markdown></span>
                     {isChecked && !isQuizMode && opt === currentQuestion.correctAnswer && (
                       <Check className="h-4 w-4 text-emerald-600" />
                     )}
@@ -197,7 +198,7 @@ export default function QuizRoom({ questions, isQuizMode, onComplete }: QuizRoom
                 />
                 {!isQuizMode && isChecked && (
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700">
-                    Correct Answer: <span className="text-emerald-700">{currentQuestion.correctAnswer}</span>
+                    Correct Answer: <span className="text-emerald-700"><Markdown>{currentQuestion.correctAnswer}</Markdown></span>
                   </div>
                 )}
               </div>
@@ -210,7 +211,7 @@ export default function QuizRoom({ questions, isQuizMode, onComplete }: QuizRoom
               <Lightbulb className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
               <div>
                 <h5 className="text-xs font-bold text-amber-800 uppercase tracking-wider">Hint</h5>
-                <p className="text-xs text-amber-700 mt-0.5 font-medium">{currentQuestion.hint}</p>
+                <p className="text-xs text-amber-700 mt-0.5 font-medium"><Markdown>{currentQuestion.hint}</Markdown></p>
               </div>
             </div>
           )}
@@ -230,7 +231,7 @@ export default function QuizRoom({ questions, isQuizMode, onComplete }: QuizRoom
                   {isCorrect ? "Hapo Sawa! Correct!" : "Oops, Not quite!"}
                 </h4>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
-                  {currentQuestion.explanation}
+                  <Markdown>{currentQuestion.explanation}</Markdown>
                 </p>
               </div>
             </div>

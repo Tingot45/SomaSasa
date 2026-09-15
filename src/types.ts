@@ -30,6 +30,7 @@ export interface DbLesson {
   analogy: string;
   diagramCode: string | null;
   audioBase64: string | null;
+  narrationScript?: string | null;
   materialId: number | null;
   status?: string;
   feedbackText?: string | null;

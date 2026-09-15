@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, RotateCw, CheckCircle2 } from "lucide-react";
 import { DbFlashcard } from "../types.ts";
+import Markdown from "./Markdown.tsx";
 
 interface FlashcardSetProps {
   flashcards: DbFlashcard[];
@@ -74,7 +75,7 @@ export default function FlashcardSet({ flashcards }: FlashcardSetProps) {
             </span>
             <div className="flex-1 flex items-center justify-center text-center">
               <h3 className="text-2xl font-bold text-slate-800 px-4 leading-relaxed">
-                {currentCard.front}
+                <Markdown>{currentCard.front}</Markdown>
               </h3>
             </div>
             <div className="flex items-center justify-center gap-2 text-xs text-indigo-500 font-semibold bg-indigo-50/50 py-2 rounded-xl">
@@ -90,7 +91,7 @@ export default function FlashcardSet({ flashcards }: FlashcardSetProps) {
             </span>
             <div className="flex-1 flex items-center justify-center text-center">
               <p className="text-lg text-slate-700 font-medium px-4 leading-relaxed">
-                {currentCard.back}
+                <Markdown>{currentCard.back}</Markdown>
               </p>
             </div>
             <div className="flex items-center justify-center gap-2 text-xs text-slate-400">

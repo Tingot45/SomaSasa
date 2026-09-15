@@ -36,6 +36,7 @@ import MaterialUpload from "./components/MaterialUpload.tsx";
 import TeacherAnalyticsView from "./components/TeacherAnalyticsView.tsx";
 import StudentAchievements from "./components/StudentAchievements.tsx";
 import TeacherFeedback from "./components/TeacherFeedback.tsx";
+import Markdown from "./components/Markdown.tsx";
 import {
   saveLessonOffline,
   getLessonOffline,
@@ -1121,10 +1122,8 @@ export default function App() {
                         </div>
 
                         {/* Text explanation */}
-                        <div className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed space-y-4 font-sans border-t border-slate-100 pt-5">
-                          {lessonDetail.lesson.content.split("\n\n").map((para, i) => (
-                            <p key={i}>{para}</p>
-                          ))}
+                        <div className="border-t border-slate-100 pt-5">
+                          <Markdown>{lessonDetail.lesson.content}</Markdown>
                         </div>
 
                         <div className="border-t border-slate-100 pt-6 mt-6 flex justify-end">
@@ -1146,7 +1145,7 @@ export default function App() {
                             Kenyan Analogy
                           </h4>
                           <p className="text-xs text-amber-800 leading-relaxed mt-2 font-medium">
-                            {lessonDetail.lesson.analogy}
+                            <Markdown>{lessonDetail.lesson.analogy}</Markdown>
                           </p>
                         </div>
 
@@ -1174,7 +1173,7 @@ export default function App() {
                           Narrated Lecture Notes
                         </h4>
                         <blockquote className="border-l-4 border-indigo-500 pl-4 text-xs italic text-slate-600 leading-relaxed font-medium">
-                          {lessonDetail.lesson.narrationScript}
+                          <Markdown>{lessonDetail.lesson.narrationScript}</Markdown>
                         </blockquote>
 
                         <div className="mt-5">
