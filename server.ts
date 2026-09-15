@@ -41,7 +41,7 @@ async function startServer() {
     app.post("/api/dev/login", async (req, res) => {
       const { email, role } = req.body;
       const devEmail = email || "dev@somasasa.local";
-      const devUid = "dev-user-" + Date.now();
+      const devUid = "dev-user";
 
       // Upsert dev user in DB
       const result = await db
@@ -54,11 +54,11 @@ async function startServer() {
         })
         .onConflictDoUpdate({
           target: users.uid,
-          set: { email: devEmail },
+          set: { email: devEmail, role: role || "student" },
         })
         .returning();
 
-      res.json({ user: result[0], uid: devUid, token: "dev-token-" + devUid });
+      res.json({ user: result[0], uid: devUid, token: "dev-token" });
     });
   }
 

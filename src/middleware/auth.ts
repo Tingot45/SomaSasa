@@ -17,6 +17,16 @@ export const requireAuth = async (
   }
 
   const token = authHeader.split("Bearer ")[1];
+
+  // DEV BYPASS: accept a dev token without Firebase verification
+  if (process.env.NODE_ENV !== "production" && token.startsWith("dev-token")) {
+    req.user = {
+      uid: "dev-user",
+      email: "dev@somasasa.local",
+    } as DecodedIdToken;
+    return next();
+  }
+
   try {
     const decodedToken = await adminAuth.verifyIdToken(token);
     req.user = decodedToken;

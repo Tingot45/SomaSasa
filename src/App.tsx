@@ -312,17 +312,31 @@ export default function App() {
   };
 
   const handleDevLogin = async (role: "student" | "teacher") => {
-    setFirebaseUser({ uid: "dev-user", displayName: "Dev User", email: "dev@somasasa.local" } as any);
-    setToken("dev-token");
-    setDbUser({
-      id: 1,
-      uid: "dev-user",
-      email: "dev@somasasa.local",
-      role,
-      isSubscribed: true,
-      points: 120,
-    } as any);
-    setAuthLoading(false);
+    try {
+      const res = await fetch("/api/dev/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "dev@somasasa.local", role }),
+      });
+      const data = await res.json();
+      setFirebaseUser({ uid: "dev-user", displayName: "Dev User", email: "dev@somasasa.local" } as any);
+      setToken(data.token || "dev-token");
+      setDbUser(data.user);
+      setAuthLoading(false);
+    } catch (err) {
+      console.error("Dev login failed:", err);
+      setFirebaseUser({ uid: "dev-user", displayName: "Dev User", email: "dev@somasasa.local" } as any);
+      setToken("dev-token");
+      setDbUser({
+        id: 1,
+        uid: "dev-user",
+        email: "dev@somasasa.local",
+        role,
+        isSubscribed: true,
+        points: 120,
+      } as any);
+      setAuthLoading(false);
+    }
   };
 
   const handleLogout = async () => {

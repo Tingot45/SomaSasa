@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 const { Pool } = pkg;
 import * as schema from "./schema.ts";
+import { MemoryDB } from "./memory.ts";
 
 declare global {
   var _postgresPool: InstanceType<typeof Pool> | undefined;
@@ -25,6 +26,7 @@ export const createPool = () => {
   return global._postgresPool;
 };
 
-const pool = createPool();
+const useMemoryDb =
+  !process.env.SQL_HOST || !process.env.SQL_DB_NAME || !process.env.SQL_USER || !process.env.SQL_PASSWORD;
 
-export const db = drizzle(pool, { schema });
+export const db: any = useMemoryDb ? new MemoryDB() : drizzle(createPool(), { schema });
