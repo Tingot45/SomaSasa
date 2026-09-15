@@ -1,0 +1,6 @@
+{
+  "name": "SomaSasa: Kenyan Student AI Study Companion",
+  "description": "A scalable full-stack web application for Kenyan students to study at their own pace using AI-synthesized lessons, audio tutorials, SVG diagrams, flashcards, interactive practice questions, and quizzes based on uploaded study materials.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* 3D Transform Utilities for Flashcards */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Custom progress transition */
+.progress-transition {
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
